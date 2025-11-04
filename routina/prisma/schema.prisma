@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL")
+}
+
+model Preferences {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  role            String?  @db.VarChar(50)
+  timezone        String?  @db.VarChar(100)
+  wakeTime        String?  @map("wake_time") @db.VarChar(10)
+  sleepTime       String?  @map("sleep_time") @db.VarChar(10)
+  goals           Json?    @default("[]")
+  constraintsList Json?    @map("constraints_list") @default("[]")
+  focusAreas      Json?    @map("focus_areas") @default("[]")
+  routineTypes    Json?    @map("routine_types") @default("[]")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("preferences")
+}
+
+model Plan {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  date           DateTime @db.Date
+  blocks         Json     @default("[]")
+  status         String?  @default("active") @db.VarChar(50)
+  completionRate Decimal? @default(0) @map("completion_rate") @db.Decimal(5, 2)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([userId, date])
+  @@map("plans")
+}
+
+model Habit {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  name            String    @db.VarChar(255)
+  description     String?   @db.Text
+  targetFrequency String    @map("target_frequency") @db.VarChar(50)
+  category        String?   @db.VarChar(100)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  checkins        Checkin[]
+
+  @@map("habits")
+}
+
+model Checkin {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  habitId   String   @map("habit_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  date      DateTime @db.Date
+  completed Boolean  @default(false)
+  notes     String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@map("checkins")
+}
+
+model Reminder {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  type      String   @db.VarChar(50)
+  time      String   @db.VarChar(10)
+  message   String?  @db.Text
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("reminders")
+}

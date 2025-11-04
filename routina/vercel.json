@@ -1,0 +1,13 @@
+{
+  "buildCommand": "prisma generate && next build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "installCommand": "pnpm install",
+  "env": {
+    "DATABASE_URL": "@database_url",
+    "NEXT_PUBLIC_SUPABASE_URL": "@next_public_supabase_url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@next_public_supabase_anon_key",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
+    "GEMINI_API_KEY": "@gemini_api_key"
+  }
+}
